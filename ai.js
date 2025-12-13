@@ -57,11 +57,23 @@ export async function getAICode(absolutePath, instruction, previousError = null)
             3. Save the result to "/data/${fileName}" (or a new file if requested).
             
             AVAILABLE LIBRARIES (PRE-INSTALLED):
+            - sumy (Text Summarization). Usage: 
+                from sumy.parsers.plaintext import PlaintextParser
+                from sumy.nlp.tokenizers import Tokenizer
+                from sumy.summarizers.lsa import LsaSummarizer
+            - pytesseract (OCR - Use if pypdf returns empty text). Usage:
+                from pdf2image import convert_from_path
+                import pytesseract
+                images = convert_from_path('filename.pdf')
+                text = pytesseract.image_to_string(images[0])
+            - ghostscript (System Tool - Use subprocess). Usage:
+                subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS=/ebook', '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile=output.pdf', 'input.pdf'])
+            - python-docx (Read Word Docs)
+            - nltk (Natural Language Processing)
             - pandas, numpy (Data)
             - openpyxl, xlsxwriter (Excel)
             - pypdf (Split/Merge/Rotate PDFs)
             - reportlab (Create PDFs)
-            - python-docx (Word Docs)
             - os, sys, re, json (Standard)
 
             CONTEXT:

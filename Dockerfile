@@ -1,36 +1,35 @@
-# Dockerfile
 FROM python:3.11-slim
 
-# 1. Environment Variables to keep Python clean
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 2. Install System Dependencies (Required for some heavy Python libs)
-# We install 'build-essential' for compiling C extensions if needed
 RUN apt-get update && apt-get install -y \
     build-essential \
+    # The "Eyes" (OCR Engine)
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    # The "Lens" (PDF to Image converter)
+    poppler-utils \
+    ghostscript \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Install The "Office Automation" Stack
+# 2. Install Python Libraries
 RUN pip install --no-cache-dir \
-    # Data Science & Excel
     pandas \
-    numpy \
     openpyxl \
-    xlsxwriter \
-    # PDF Manipulation
-    pypdf \
-    reportlab \
-    pdfminer.six \
-    # Word Documents
     python-docx \
-    # Basic Text Processing
-    nltk
+    pypdf \
+    sumy \
+    nltk \
+    tinysegmenter \
+    # OCR Python Wrappers
+    pytesseract \
+    pdf2image \
+    pillow
 
-# 4. Set the secure working directory
+# Download NLTK data (The "brains" for the micro-model)
+RUN python -m nltk.downloader -d /usr/local/share/nltk_data punkt punkt_tab stopwords
+
 WORKDIR /data
-
-# 5. Create a non-root user (Security Best Practice)
-# This prevents the container from having root access even inside itself
 RUN useradd -m ghostuser
 USER ghostuser
