@@ -34,7 +34,7 @@ export async function editFile(filePath, options) {
             const aiCode = await getAICode(absolutePath, options.instruction, lastError);
             
             // Optional: Show code for debugging
-            // console.log(chalk.gray(aiCode)); 
+            console.log(chalk.gray(aiCode)); 
 
             // Step 2: Execute in Container
             // runInContainer MUST return { success: boolean, logs: string }
