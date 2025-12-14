@@ -1,4 +1,6 @@
-import fs from 'fs';
+/**
+ * Docker-related utility functions
+ */
 
 /**
  * STRIPS DOCKER HEADERS (The Magic Fix)
@@ -38,12 +40,3 @@ export function formatPathForDocker(rawPath) {
   return safePath;
 }
 
-/**
- * Reads the first 1000 characters of a file for AI context.
- * @param {string} filePath - The path to the file.
- * @returns {string} A preview of the file content.
- */
-export function getFilePreview(filePath) {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  return content.substring(0, 1000) + (content.length > 1000 ? '\n...(truncated)' : '');
-}

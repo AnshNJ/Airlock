@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import ora from 'ora';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getFilePreview } from './utils.js';
+import { getFilePreview } from '../utils/fileUtils.js';
 import path from 'path';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -66,8 +66,20 @@ export async function getAICode(absolutePath, instruction, previousError = null)
                 import pytesseract
                 images = convert_from_path('filename.pdf')
                 text = pytesseract.image_to_string(images[0])
-            - ghostscript (System Tool - Use subprocess). Usage:
-                subprocess.run(['gs', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS=/ebook', '-dNOPAUSE', '-dQUIET', '-dBATCH', '-sOutputFile=output.pdf', 'input.pdf'])
+            - ghostscript (System Tool). 
+                Usage for SAFE COMPRESSION (Use this by default):
+                subprocess.run([
+                    'gs', 
+                    '-sDEVICE=pdfwrite', 
+                    '-dCompatibilityLevel=1.4', 
+                    '-dPDFSETTINGS=/default',    // <-- CHANGED from /ebook to /default (prevents text stripping)
+                    '-dNOPAUSE', '-dQUIET', '-dBATCH',
+                    '-dDetectDuplicateImages=true',
+                    '-dCompressFonts=true',      // <-- Explicitly compress fonts
+                    '-r150',                     // <-- Manually set resolution to 150 DPI (Ebook quality)
+                    '-sOutputFile=output.pdf', 
+                    'input.pdf'
+              ])
             - python-docx (Read Word Docs)
             - nltk (Natural Language Processing)
             - pandas, numpy (Data)

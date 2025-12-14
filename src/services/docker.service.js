@@ -1,7 +1,8 @@
 import Docker from 'dockerode';
 import ora from 'ora';
-import chalk from 'chalk';
-import { stripDockerHeaders } from './utils.js';
+import { stripDockerHeaders } from '../utils/dockerUtils.js';
+import logger from '../utils/logger.js';
+
 const docker = new Docker();
 
 /**
@@ -30,11 +31,9 @@ export async function runInContainer(aiCode, dockerSafeDir) {
         const cleanLogs = stripDockerHeaders(logsBuffer);
 
         spinner.succeed('Container execution finished.');
-        console.log(chalk.blue('\n--- Container Logs ---'));
-        console.log(cleanLogs);
 
         return {
-            success: data.StatusCode === 0, // True if exit code is 0
+            success: data.StatusCode === 0,
             logs: cleanLogs
         };
 
