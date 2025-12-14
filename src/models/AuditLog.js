@@ -1,5 +1,6 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import 'dotenv/config';
+import logger from '../utils/logger.js';
 
 if(!process.env.DATABASE_URL){
     throw new Error('DATABASE_URL is not set');
@@ -7,7 +8,7 @@ if(!process.env.DATABASE_URL){
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
-    logging: console.log,
+    logging: false,
     pool: {
         max: 5,
         min: 0,
@@ -52,6 +53,9 @@ export const AuditLog = sequelize.define('AuditLog', {
         type: DataTypes.STRING,
         allowNull: false
     }
+}, {
+    tableName: 'AuditLog', // Explicitly set table name to prevent pluralization
+    timestamps: true // Enable createdAt and updatedAt
 });
 
 
@@ -59,9 +63,9 @@ export const initDB = async () => {
     try {
         await sequelize.authenticate();
         await sequelize.sync({ alter: true }); //Alter the database schema to match the model
-        console.log('Connection has been established successfully.');
+        logger.info('Connection has been established successfully.');
     } catch (error) {
-        console.error('Unable to connect to the database:', error);
+        logger.error('Unable to connect to the database:', error);
         process.exit(1);
     }
 }   

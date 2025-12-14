@@ -20,6 +20,11 @@ program
   .description('Securely modify local files using AI')
   .version('1.0.0');
 
+/*
+Edit command:
+node index.js edit scan.pdf --instruction "Compress this PDF to 'ebook' quality using Ghostscript"
+*/
+
 program
   .command('edit')
   .argument('<file>', 'The file you want to modify')
