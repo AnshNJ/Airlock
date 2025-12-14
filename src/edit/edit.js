@@ -2,9 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
-import { formatPathForDocker, stripDockerHeaders } from './utils.js';
-import { getAICode } from './ai.js';
-import { runInContainer } from './docker.js';
+import { formatPathForDocker, stripDockerHeaders } from '../utils/utils.js';
+import { getAICode } from '../ai/ai.js';
+import { runInContainer } from '../docker/docker.js';
 
 export async function editFile(filePath, options) {
     const spinner = ora('Initializing GhostDock...').start();

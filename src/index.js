@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import { Command } from 'commander';
-import { editFile } from './edit.js';
+import { editFile } from './edit/edit.js';
 
 const program = new Command();
 

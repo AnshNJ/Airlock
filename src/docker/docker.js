@@ -1,7 +1,7 @@
 import Docker from 'dockerode';
 import ora from 'ora';
 import chalk from 'chalk';
-import { stripDockerHeaders } from './utils.js';
+import { stripDockerHeaders } from '../utils/utils.js';
 const docker = new Docker();
 
 /**
