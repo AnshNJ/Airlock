@@ -1,7 +1,17 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import { Command } from 'commander';
-import { editFile } from './edit/edit.js';
+import { editFile } from './services/fileEdit.service.js';
+import { initDB } from './models/AuditLog.js';
+import logger from './utils/logger.js';
+
+// Initialize database connection if DATABASE_URL is set
+if (process.env.DATABASE_URL) {
+    initDB().catch((error) => { 
+        logger.error('Database initialization failed:', error.message);
+        logger.warn('Continuing without audit logging...');
+    });
+}
 
 const program = new Command();
 
