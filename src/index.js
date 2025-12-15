@@ -20,11 +20,18 @@ program
   .description('Securely modify local files using AI')
   .version('1.0.0');
 
-/*
-Edit command:
-node index.js edit scan.pdf --instruction "Compress this PDF to 'ebook' quality using Ghostscript"
-*/
+// Server mode - start Express server
+program
+  .command('server')
+  .description('Start the web server')
+  .action(() => {
+    import('./server.js').catch((error) => {
+      logger.error('Failed to start server:', error.message);
+      process.exit(1);
+    });
+  });
 
+// CLI edit command
 program
   .command('edit')
   .argument('<file>', 'The file you want to modify')
