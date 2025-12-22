@@ -1,4 +1,4 @@
-# 🔒 Airlock (formerly GhostDock)
+# 🔒 Airlock
 
 > **"AI modification in a vacuum."**  
 > Securely edit sensitive local files using Cloud AI intelligence without your data ever leaving the machine.
