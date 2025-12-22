@@ -1,4 +1,4 @@
-# 🔒 Airlock (formerly GhostDock)
+# 🔒 Airlock
 
 
 
