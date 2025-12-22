@@ -1,0 +1,136 @@
+import 'dotenv/config';
+import ora from 'ora';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getFilePreview } from '../utils/fileUtils.js';
+import path from 'path';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+/**
+ * A helper function to retry API calls with exponential backoff.
+ */
+async function generateWithRetry(model, prompt, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await model.generateContent(prompt);
+    } catch (error) {
+      if (!error.message.includes('503') && !error.message.includes('overloaded')) {
+        throw error;
+      }
+      
+      if (i === retries - 1) throw error;
+
+      const waitTime = 2000 * (i + 1);
+      const spinner = ora(`Model overloaded. Retrying in ${waitTime/1000}s...`).start();
+      await new Promise(r => setTimeout(r, waitTime));
+      spinner.stop();
+    }
+  }
+}
+
+/**
+ * Consults Gemini to generate (or fix) a Python script.
+ * @param {string} absolutePath - The absolute path to the file.
+ * @param {string} instruction - The user's instruction.
+ * @param {string|null} previousError - (NEW) The error log if the previous attempt failed.
+ * @returns {Promise<string>} The generated Python code.
+ */
+export async function getAICode(absolutePath, instruction, previousError = null) {
+    // Change spinner text depending on if we are creating or fixing
+    const spinnerText = previousError ? 'Consulting Gemini to FIX code...' : 'Consulting Gemini (Cloud)...';
+    const spinner = ora(spinnerText).start();
+    
+    try {
+        const fileName = path.basename(absolutePath);
+        const filePreview = getFilePreview(absolutePath);
+        
+        // Recommended: Use 'gemini-1.5-flash' for better stability if 2.5 is overloaded
+        const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL }); 
+
+        // 1. Build the Base Prompt
+        let prompt = `
+            You are an expert Python coder.
+            
+            TASK:
+            1. Read "/data/${fileName}".
+            2. Perform instruction: "${instruction}".
+            3. Save the result to "/data/${fileName}" (or a new file if requested).
+            
+            AVAILABLE LIBRARIES (PRE-INSTALLED):
+            - sumy (Text Summarization). Usage: 
+                from sumy.parsers.plaintext import PlaintextParser
+                from sumy.nlp.tokenizers import Tokenizer
+                from sumy.summarizers.lsa import LsaSummarizer
+            - pytesseract (OCR - Use if pypdf returns empty text). Usage:
+                from pdf2image import convert_from_path
+                import pytesseract
+                images = convert_from_path('filename.pdf')
+                text = pytesseract.image_to_string(images[0])
+            - ghostscript (System Tool). 
+                Usage for SAFE COMPRESSION (Use this by default):
+                subprocess.run([
+                    'gs', 
+                    '-sDEVICE=pdfwrite', 
+                    '-dCompatibilityLevel=1.4', 
+                    '-dPDFSETTINGS=/default',    // <-- CHANGED from /ebook to /default (prevents text stripping)
+                    '-dNOPAUSE', '-dQUIET', '-dBATCH',
+                    '-dDetectDuplicateImages=true',
+                    '-dCompressFonts=true',      // <-- Explicitly compress fonts
+                    '-r150',                     // <-- Manually set resolution to 150 DPI (Ebook quality)
+                    '-sOutputFile=output.pdf', 
+                    'input.pdf'
+              ])
+            - python-docx (Read Word Docs)
+            - nltk (Natural Language Processing)
+            - pandas, numpy (Data)
+            - openpyxl, xlsxwriter (Excel)
+            - pypdf (Split/Merge/Rotate PDFs)
+            - reportlab (Create PDFs)
+            - os, sys, re, json (Standard)
+
+            CONTEXT:
+            - File Content Preview:
+            """
+            ${filePreview}
+            """
+
+            CRITICAL REQUIREMENTS:
+            1. You MUST print "DEBUG: ..." logs for every step.
+            2. You MUST print "SUCCESS" if finished.
+            3. Return ONLY valid Python code.
+            4. If the user asks for PDF operations, use 'pypdf'.
+            5. If the user asks for Word operations, use 'python-docx'.
+        `;
+
+        // 2. (NEW) Inject Error Context if this is a Retry
+        if (previousError) {
+            prompt += `
+            
+            🚨 PREVIOUS CODE FAILED 🚨
+            The last script you wrote crashed with this error:
+            """
+            ${previousError}
+            """
+            
+            CORRECTION TASK:
+            - Analyze the error above.
+            - Rewrite the code to fix the issue.
+            - Ensure you handle the specific edge case that caused the crash.
+            `;
+        }
+
+        const result = await generateWithRetry(model, prompt);
+        const response = await result.response;
+        let aiCode = response.text();
+
+        // Cleanup markdown backticks
+        aiCode = aiCode.replace(/```python/g, '').replace(/```/g, '').trim();
+        
+        spinner.succeed(previousError ? 'Fix generated by AI.' : 'Plan generated by AI.');
+        return aiCode;
+
+    } catch (error) {
+        spinner.fail('Failed to consult Gemini.');
+        throw error;
+    }
+}
