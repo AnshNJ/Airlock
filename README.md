@@ -191,32 +191,42 @@ GhostDock/
 
 ---
 
-## 🔮 Future Roadmap
+## ✅ Completed Features
 
-### 1. 🖥️ Desktop GUI (Electron/React)
-* **Goal:** Make Airlock accessible to non-technical users (HR, Finance, Legal) who aren't comfortable with the Command Line.
-* **Plan:** Build a simple drag-and-drop interface where users can:
-    1. Drop a file.
-    2. Type an instruction (e.g., "Summarize this").
-    3. See a real-time progress bar of the Docker container.
-    4. View a "Diff" of the changes before saving.
+### 🖥️ Web UI (React)
+* **Status:** ✅ Completed
+* **Description:** Modern React-based web interface that makes Airlock accessible to non-technical users. Features include:
+    * Drag-and-drop file upload
+    * Instruction input interface
+    * Real-time processing status
+    * Download processed files
+* **Access:** Available at `http://localhost:5173` in development mode
 
-### 2. 🛡️ PII Redaction Layer
-* **Goal:** Prevent accidental leakage of sensitive data in prompts.
-* **Plan:** Implement a Regex pre-processor that detects patterns (Emails, SSNs, Credit Cards) in the file preview and replaces them with `[REDACTED]` *before* sending the context to the AI.
+    <img src="server/asset/UI_sample.png" alt="UI Sample" width="60%">
 
-### 3. 🕵️‍♂️ Audit Trails (SQLite)
-* **Goal:** Enterprise accountability.
-* **Plan:** Create a local `airlock.db` that logs every operation:
+
+### 🕵️‍♂️ Audit Trails (PostgreSQL/SQLite)
+* **Status:** ✅ Completed
+* **Description:** Enterprise accountability through comprehensive audit logging. Logs every operation including:
     * Timestamp
     * File Name
     * User Instruction
     * Python Script Executed
     * File Hash (Before/After)
+* **Implementation:** Supports both PostgreSQL (via `DATABASE_URL`) and can be extended for SQLite
 
-### 4. 📦 Plugin System
+---
+
+## 🔮 Future Roadmap
+
+### 1. 🛡️ PII Redaction Layer
+* **Goal:** Prevent accidental leakage of sensitive data in prompts.
+* **Plan:** Implement a Regex pre-processor that detects patterns (Emails, SSNs, Credit Cards) in the file preview and replaces them with `[REDACTED]` *before* sending the context to the AI.
+
+### 2. 📦 Plugin System
 * **Goal:** Extensibility.
 * **Plan:** Allow users to add custom Python libraries to the Docker container via a `requirements.txt` file in their project folder.
+
 
 ---
 
