@@ -6,7 +6,7 @@ export default function InstructionInput({ value, onChange, disabled }) {
         id="instruction"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Enter your instruction here... (e.g., 'Compress this PDF to email size using Ghostscript')"
+        placeholder="Enter your instruction here... (e.g., 'Compress this PDF to email attachment size.')"
         disabled={disabled}
         rows={4}
       />

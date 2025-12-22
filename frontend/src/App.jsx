@@ -41,15 +41,11 @@ function App() {
       const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
       
-      // Get filename from Content-Disposition header or use default
-      const contentDisposition = response.headers['content-disposition'];
-      let fileName = 'processed_file';
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/i);
-        if (fileNameMatch) {
-          fileName = fileNameMatch[1];
-        }
-      }
+      // Use default filename with original file extension
+      const lastDotIndex = selectedFile.name.lastIndexOf('.');
+      const fileName = lastDotIndex > 0 
+        ? `processed_file${selectedFile.name.substring(lastDotIndex)}`
+        : 'processed_file';
 
       setDownloadUrl(url);
       setDownloadFileName(fileName);

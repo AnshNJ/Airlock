@@ -24,11 +24,14 @@ program
 program
   .command('server')
   .description('Start the web server')
-  .action(() => {
-    import('./server.js').catch((error) => {
+  .action(async () => {
+    try {
+      const { startServer } = await import('./server.js');
+      startServer();
+    } catch (error) {
       logger.error('Failed to start server:', error.message);
       process.exit(1);
-    });
+    }
   });
 
 // CLI edit command
